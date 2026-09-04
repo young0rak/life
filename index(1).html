@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>내 힘들다 · 다들 힘내 — 거꾸로 읽기</title>
+<!--
+  2026 전국 대학생 생명존중 광고공모전 수상작 · 주제① 랜딩페이지
+  장치: 같은 네 글자(내/힘/들/다)를 읽는 "방향"만 바꾸면 의미가 뒤집힌다.
+  밤(위→아래: 내 힘들다) ↔ 새벽(아래→위: 다들 힘내)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --bg-2: #0d1424;
+    --ink: #9aa6b8;
+    --dim: #4f5a6b;
+    --strong: #cfdcef;
+    --accent: #f0a93b;
+    --glow: rgba(199, 212, 232, 0.45);
+    --line: rgba(154, 166, 184, 0.22);
+    --mode-ease: 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    --serif: "Nanum Myeongjo", "Apple SD Gothic Neo", "Noto Serif KR", serif;
+    --sans: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  }
+  body.dawn {
+    --bg: #f2f7fc;
+    --bg-2: #e7f0f8;
+    --ink: #33486b;
+    --dim: #8fa1b8;
+    --strong: #14294a;
+    --accent: #e08f12;
+    --glow: rgba(240, 169, 59, 0.5);
+    --line: rgba(51, 72, 107, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: auto; }
+  body {
+    font-family: var(--sans);
+    font-size: 16px;
+    background: var(--bg);
+    color: var(--ink);
+    transition: background var(--mode-ease), color var(--mode-ease);
+    overflow-x: hidden;
+    line-height: 1.75;
+  }
+
+  /* ---- 배경 입자 (밤: 내리는 비 / 새벽: 떠오르는 빛) ---- */
+  #sky {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    max-width: 1200px;             /* 공모 규격: 가로 1200px 스크롤형 */
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* ---- 수상작 표기 ---- */
+  .award-label {
+    position: absolute;
+    top: 28px;
+    left: 48px;
+    z-index: 3;
+    max-width: calc(100% - 96px);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--strong);
+    word-break: keep-all;
+    transition: color var(--mode-ease);
+  }
+
+  /* ---- 공통 텍스트 크로스페이드 (밤 문장 ↔ 새벽 문장) ---- */
+  .swap { display: grid; }
+  .swap > * {
+    grid-area: 1 / 1;
+    transition: opacity var(--mode-ease), transform var(--mode-ease);
+  }
+  .swap .night { opacity: 1; transform: translateY(0); }
+  .swap .dawn  { opacity: 0; transform: translateY(14px); }
+  body.dawn .swap .night { opacity: 0; transform: translateY(-14px); }
+  body.dawn .swap .dawn  { opacity: 1; transform: translateY(0); }
+
+  .eyebrow {
+    font-size: clamp(15px, 1.3vw, 18px);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--strong);
+    text-transform: uppercase;
+    word-break: keep-all;
+    transition: color var(--mode-ease);
+  }
+
+  /* ---- 히어로 ---- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 72px 0 56px;
+    gap: 40px;
+  }
+
+  .glyph-stage {
+    display: flex; align-items: center; gap: 36px;
+  }
+
+  /* 읽기 방향 화살표: 글자 전체 높이에 맞춘 선 + 또렷한 화살촉 */
+  .direction {
+    position: relative;
+    align-self: stretch;
+    width: 2px;
+    height: auto;
+    margin: 30px 0;
+    border-radius: 999px;
+    background: linear-gradient(var(--line), var(--line));
+    transition: background var(--mode-ease);
+  }
+  .direction::before,
+  .direction::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border-right: 2px solid var(--dim);
+    border-bottom: 2px solid var(--dim);
+    transition: opacity 0.45s ease, border-color var(--mode-ease);
+  }
+  /* 밤: 아래 방향 */
+  .direction::before {
+    bottom: -1px;
+    transform: translate(-50%, 28%) rotate(45deg);
+    opacity: 1;
+  }
+  /* 새벽: 위 방향 */
+  .direction::after {
+    top: -1px;
+    transform: translate(-50%, -28%) rotate(-135deg);
+    opacity: 0;
+  }
+  body.dawn .direction::before { opacity: 0; }
+  body.dawn .direction::after { opacity: 1; }
+
+  .glyphs {
+    display: flex; flex-direction: column;
+    font-family: var(--serif);
+    font-weight: 800;
+    font-size: clamp(64px, 13vh, 116px);
+    line-height: 1.28;
+    color: var(--dim);
+  }
+  .glyphs .g {
+    transition: color var(--mode-ease);
+  }
+  .glyphs.play .g {
+    animation: lit 1.1s ease forwards;
+  }
+  /* 밤: 위에서 아래로 켜진다 */
+  .glyphs.play .g:nth-child(1) { animation-delay: 0.2s; }
+  .glyphs.play .g:nth-child(2) { animation-delay: 0.62s; }
+  .glyphs.play .g:nth-child(3) { animation-delay: 1.04s; }
+  .glyphs.play .g:nth-child(4) { animation-delay: 1.46s; }
+  /* 새벽: 아래에서 위로 켜진다 */
+  body.dawn .glyphs.play .g:nth-child(4) { animation-delay: 0.2s; }
+  body.dawn .glyphs.play .g:nth-child(3) { animation-delay: 0.62s; }
+  body.dawn .glyphs.play .g:nth-child(2) { animation-delay: 1.04s; }
+  body.dawn .glyphs.play .g:nth-child(1) { animation-delay: 1.46s; }
+
+  @keyframes lit {
+    0%   { color: var(--dim); text-shadow: none; }
+    45%  { color: var(--strong); text-shadow: 0 0 42px var(--glow); }
+    100% { color: var(--strong); text-shadow: 0 0 14px var(--glow); }
+  }
+
+  .caption { gap: 0; justify-items: center; }
+  .caption .read {
+    font-family: var(--serif);
+    font-size: clamp(29px, 3.6vw, 42px);
+    font-weight: 700;
+    color: var(--strong);
+    letter-spacing: 0.06em;
+  }
+  .caption .how {
+    display: block;
+    margin-top: 10px;
+    font-size: 16px;
+    letter-spacing: 0.16em;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* 새벽에만 드러나는 히어로 마무리 문장 */
+  .hero-extra {
+    max-width: 560px;
+    opacity: 0; visibility: hidden;
+    transform: translateY(16px);
+    transition: opacity var(--mode-ease), transform var(--mode-ease), visibility 0s linear 1.8s;
+  }
+  body.dawn .hero-extra {
+    opacity: 1; visibility: visible;
+    transform: translateY(0);
+    transition: opacity var(--mode-ease) 0.5s, transform var(--mode-ease) 0.5s, visibility 0s;
+  }
+  .hero-extra .choice {
+    font-family: var(--serif);
+    font-size: clamp(21px, 2.3vw, 27px);
+    color: var(--strong);
+    line-height: 1.9;
+  }
+  .hero-extra .choice em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .hero-extra .help-line {
+    margin-top: 22px;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+  .hero-extra .help-line strong {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 34px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px; letter-spacing: 0.22em;
+    color: var(--ink);
+    font-weight: 500;
+    transition: opacity var(--mode-ease), color var(--mode-ease);
+    animation: bob 2.6s ease-in-out infinite;
+  }
+  body.dawn .scroll-hint { opacity: 0; }
+  @keyframes bob {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 8px); }
+  }
+
+  /* ---- 문장 블록 ---- */
+  .verse {
+    min-height: 72vh;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .verse .swap { max-width: 620px; justify-items: center; }
+  .verse p {
+    font-family: var(--serif);
+    font-size: clamp(23px, 2.8vw, 33px);
+    font-weight: 400;
+    line-height: 2.1;
+    color: var(--ink);
+    word-break: keep-all;
+  }
+  .verse p strong {
+    font-weight: 800;
+    color: var(--strong);
+  }
+  .verse p .warm { color: var(--accent); font-weight: 700; }
+
+  /* 스크롤 등장 */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 1s ease, transform 1s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ---- 전환 섹션 ---- */
+  .turn {
+    min-height: 92vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    gap: 34px;
+    padding-bottom: 96px;
+  }
+  .turn .swap { justify-items: center; }
+  .turn h2 {
+    font-family: var(--serif);
+    font-size: clamp(27px, 3.2vw, 38px);
+    font-weight: 700;
+    color: var(--strong);
+    line-height: 1.9;
+    word-break: keep-all;
+  }
+
+  .flip-btn {
+    font-family: var(--sans);
+    font-size: 18px; font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--strong);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 18px 44px;
+    cursor: pointer;
+    transition: color var(--mode-ease), border-color 0.4s, box-shadow 0.4s, transform 0.2s;
+  }
+  .flip-btn:hover { border-color: var(--strong); box-shadow: 0 0 28px var(--glow); transform: translateY(-2px); }
+  .flip-btn:focus-visible,
+  .reset-link:focus-visible,
+  .hotline:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  body.dawn .flip-btn { opacity: 0; pointer-events: none; position: absolute; }
+
+  .reset-link {
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    background: none; border: none;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 3px;
+    cursor: pointer;
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--mode-ease), color 0.3s;
+  }
+  body.dawn .reset-link { opacity: 1; pointer-events: auto; }
+  .reset-link:hover { color: var(--strong); }
+
+  .turn .small-help {
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: 0.06em;
+    transition: color var(--mode-ease);
+  }
+  .turn .small-help b { color: var(--accent); font-weight: 700; }
+
+  .credit {
+    padding: 0 0 44px;
+    text-align: center;
+    font-size: 13.5px;
+    line-height: 1.8;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    opacity: 0.9;
+    transition: color var(--mode-ease);
+  }
+
+  .credit .ai-disclosure {
+    margin-top: 8px;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    word-break: keep-all;
+  }
+
+  /* ---- 상시 노출 상담전화 칩 ---- */
+  .hotline {
+    position: fixed;
+    right: 24px; bottom: 24px;
+    z-index: 10;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--strong);
+    text-decoration: none;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 10px 18px;
+    transition: background var(--mode-ease), color var(--mode-ease), border-color var(--mode-ease), box-shadow 0.3s;
+  }
+  .hotline b { color: var(--accent); font-weight: 800; font-size: 18px; }
+  .hotline:hover { box-shadow: 0 0 22px var(--glow); }
+
+  @media (max-width: 720px) {
+    .page { padding: 0 24px; }
+    .award-label { top: 20px; left: 24px; right: 24px; font-size: 13px; }
+    .direction { height: auto; margin: 24px 0; }
+    .verse { min-height: 64vh; }
+    .caption .how { font-size: 14px; }
+    .credit { padding-bottom: 104px; font-size: 12.5px; }
+    .credit .ai-disclosure { font-size: 13px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glyphs.play .g { animation: none; color: var(--strong); }
+    .scroll-hint { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .swap > *, .direction, .hero-extra { transition-duration: 0.01s; }
+  }
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<main class="page">
+
+  <p class="award-label">2026 전국 대학생 생명존중 광고공모전 수상작</p>
+
+  <!-- 1. 히어로: 같은 네 글자, 읽는 방향이 다르다 -->
+  <section class="hero" id="top">
+    <p class="eyebrow swap">
+      <span class="night">밤 — 위에서 아래로 읽는 페이지</span>
+      <span class="dawn">새벽 — 아래에서 위로 읽는 페이지</span>
+    </p>
+
+    <div class="glyph-stage" aria-label="내 힘들다, 거꾸로 읽으면 다들 힘내">
+      <div class="direction" aria-hidden="true"></div>
+      <div class="glyphs play" id="glyphs" aria-hidden="true">
+        <span class="g">내</span>
+        <span class="g">힘</span>
+        <span class="g">들</span>
+        <span class="g">다</span>
+      </div>
+    </div>
+
+    <div class="caption swap">
+      <span class="night">
+        <span class="read">"내 힘들다"</span>
+        <span class="how">위에서 아래로 읽었습니다</span>
+      </span>
+      <span class="dawn">
+        <span class="read">"다들 힘내"</span>
+        <span class="how">아래에서 위로 읽었습니다</span>
+      </span>
+    </div>
+
+    <div class="hero-extra">
+      <p class="choice">
+        같은 네 글자, 방향은 함께 바꿀 수 있습니다.<br />
+        <em>오늘 다른 방향이 보이지 않는다면,<br />혼자 읽지 않아도 됩니다.</em>
+      </p>
+      <p class="help-line">
+        지금 함께 읽어줄 누군가가 필요하다면 — 자살예방 상담전화 <strong>109</strong> (24시간, 국번 없이)
+      </p>
+    </div>
+
+    <p class="scroll-hint">아래로 스크롤 ↓</p>
+  </section>
+
+  <!-- 2. 밤의 문장들 (새벽이 되면 같은 자리에서 뒤집힌다) -->
+  <section class="verse reveal">
+    <div class="swap">
+      <p class="night">괜찮냐는 말에, 괜찮다고 답하는 게<br />버릇이 된 밤이 있습니다.</p>
+      <p class="dawn">괜찮지 않다고 말해도 괜찮습니다.<br /><span class="warm">거기가 시작입니다.</span></p>
+    </div>
+  </section>
+
+  <section class="verse reveal">
+    <div class="swap">
+      <p class="night">아무에게도 보내지 못한 네 글자를<br />혼자 삼키는 날이 있습니다.<br /><strong>내 힘들다.</strong></p>
+      <p class="dawn">그 네 글자는, 뒤집으면 응원이 됩니다.<br /><strong>다들, 힘내.</strong></p>
+    </div>
+  </section>
+
+  <section class="verse reveal">
+    <div class="swap">
+      <p class="night">오늘이 끝인 것처럼<br />읽히는 날도 있습니다.</p>
+      <p class="dawn">오늘을 <span class="warm">시작이라고</span><br />읽어도 됩니다.</p>
+    </div>
+  </section>
+
+  <!-- 3. 전환: 페이지의 끝 = 거꾸로 읽기의 시작 -->
+  <section class="turn reveal">
+    <p class="eyebrow swap">
+      <span class="night">여기가 페이지의 끝입니다</span>
+      <span class="dawn">끝이라고 생각한 자리가, 시작이 됩니다</span>
+    </p>
+
+    <div class="swap">
+      <h2 class="night">글자는 그대로 두겠습니다.<br />방향만 바꿔 보세요.</h2>
+      <h2 class="dawn">인생도, 이렇게<br />거꾸로 읽을 수 있습니다.</h2>
+    </div>
+
+    <button class="flip-btn" id="flip" type="button">거꾸로 읽어보기 ↑</button>
+    <button class="reset-link" id="reset" type="button">밤의 문장부터 다시 읽기</button>
+
+    <p class="small-help">지금 마음이 무겁다면, 자살예방 상담전화 <b>109</b>가 24시간 곁에 있습니다.</p>
+  </section>
+
+  <footer class="credit">
+    <p>9월 10일 세계 자살예방의 날</p>
+    <p class="ai-disclosure">본 광고물과 랜딩페이지 이미지는 생성형 AI를 활용하여 제작되었습니다.</p>
+  </footer>
+</main>
+
+<a class="hotline" href="tel:109">자살예방 상담전화 <b>109</b></a>
+
+<script>
+(function () {
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var body = document.body;
+  var glyphs = document.getElementById("glyphs");
+  var flipBtn = document.getElementById("flip");
+  var resetBtn = document.getElementById("reset");
+
+  /* ---- 글자 점등 애니메이션 재생 ---- */
+  function replayGlyphs() {
+    glyphs.classList.remove("play");
+    void glyphs.offsetWidth; /* reflow로 애니메이션 리셋 */
+    glyphs.classList.add("play");
+  }
+
+  /* ---- 한 문장씩 멈추며 위로 올라가는 스크롤 (거꾸로 읽는 시간) ----
+     새벽 문장 앞에서 READ_MS 만큼 머문 뒤 다음 문장으로 올라간다.
+     사용자가 스크롤/터치/키 입력을 하면 즉시 자동 이동을 멈춘다. */
+  var MOVE_MS = 2200;   /* 문장 사이를 이동하는 시간 */
+  var READ_MS = 3200;   /* 각 문장을 읽는 시간 */
+
+  var cancelled = false;
+  ["wheel", "touchstart", "keydown"].forEach(function (ev) {
+    window.addEventListener(ev, function () { cancelled = true; }, { passive: true });
+  });
+
+  function animateScrollTo(to, duration) {
+    return new Promise(function (resolve) {
+      var start = window.scrollY;
+      var diff = to - start;
+      var t0 = performance.now();
+      function step(t) {
+        if (cancelled) { resolve(); return; }
+        var p = Math.min(1, (t - t0) / duration);
+        var e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        window.scrollTo(0, start + diff * e);
+        if (p < 1) requestAnimationFrame(step); else resolve();
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  function dwell(ms) {
+    return new Promise(function (resolve) {
+      var t0 = performance.now();
+      function tick(t) {
+        if (cancelled || t - t0 >= ms) { resolve(); return; }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function centerY(el) {
+    var r = el.getBoundingClientRect();
+    return Math.max(0, window.scrollY + r.top - (window.innerHeight - r.height) / 2);
+  }
+
+  function readUpToTop() {
+    if (reduced) { window.scrollTo(0, 0); return; }
+    cancelled = false;
+    var stops = Array.prototype.slice.call(document.querySelectorAll(".verse")).reverse();
+    var chain = Promise.resolve();
+    stops.forEach(function (el) {
+      chain = chain
+        .then(function () { return animateScrollTo(centerY(el), MOVE_MS); })
+        .then(function () { return dwell(READ_MS); });
+    });
+    chain
+      .then(function () { return animateScrollTo(0, MOVE_MS + 600); })
+      .then(function () { if (!cancelled) replayGlyphs(); });
+  }
+
+  flipBtn.addEventListener("click", function () {
+    if (body.classList.contains("dawn")) return;
+    body.classList.add("dawn");
+    setTimeout(function () { readUpToTop(); }, reduced ? 0 : 1100);
+  });
+
+  resetBtn.addEventListener("click", function () {
+    body.classList.remove("dawn");
+    window.scrollTo(0, 0);
+    replayGlyphs();
+  });
+
+  /* ---- 스크롤 등장 ---- */
+  if (!reduced && "IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.25 });
+    document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+  }
+
+  /* ---- 배경 입자: 밤에는 내리고, 새벽에는 떠오른다 ---- */
+  var canvas = document.getElementById("sky");
+  if (!reduced && canvas.getContext) {
+    var ctx = canvas.getContext("2d");
+    var W, H, drops = [];
+    function size() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    size();
+    window.addEventListener("resize", size);
+
+    for (var i = 0; i < 70; i++) {
+      drops.push({
+        x: Math.random(), y: Math.random(),
+        v: 0.0006 + Math.random() * 0.0016,
+        len: 8 + Math.random() * 16,
+        a: 0.08 + Math.random() * 0.22
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      var dawn = body.classList.contains("dawn");
+      for (var i = 0; i < drops.length; i++) {
+        var d = drops[i];
+        d.y += dawn ? -d.v * 0.6 : d.v;
+        if (d.y > 1.05) { d.y = -0.05; d.x = Math.random(); }
+        if (d.y < -0.05) { d.y = 1.05; d.x = Math.random(); }
+        var x = d.x * W, y = d.y * H;
+        if (dawn) {
+          /* 떠오르는 빛 조각 */
+          ctx.fillStyle = "rgba(240, 169, 59, " + d.a * 0.8 + ")";
+          ctx.beginPath();
+          ctx.arc(x, y, 2.1, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          /* 가늘게 내리는 비 */
+          ctx.strokeStyle = "rgba(150, 170, 200, " + d.a + ")";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, y + d.len);
+          ctx.stroke();
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  }
+})();
+</script>
+</body>
+</html>
